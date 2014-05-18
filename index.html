@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+<head>
+  <title>GRE voc</title>
+  <script type="text/javascript" src="words.js"></script>
+  <script type="text/javascript" src="meanings.js"></script>
+  <script>
+  function clearLocalStorage() {
+    var i,key;
+    for (i=0; i<localStorage.length;i++) {
+      key = localStorage.key(i);
+      if (!isNaN(parseInt(key))) {
+        localStorage.removeItem(key);
+        i = -1;
+      }
+    }
+  }
+  window.onload = function(){
+    var RANDOM = 0;
+    var INORDER = 1;
+    var REVERSE = -1;
+    var order = INORDER;
+    var num = words.length;
+    var voc = document.getElementById("word");
+    var opts = [];
+    var i = 0, j;
+    for (i=1; i<=5; i++) {
+      opts.push(document.getElementById("lopt" + i));
+    }
+    var ans, id, tmp;
+    var radios = document.getElementsByName('opt');
+    var submitBtn = document.getElementById("submit");
+    tmp  = localStorage.getItem("nextid");
+    if (tmp!=null) {
+      localStorage.setItem("nextid", parseInt(tmp)-1);
+    }
+    function next() {
+      var count;
+      var determined = false;
+      for (i=0; i<localStorage.length; i++) {
+        tmp = parseInt(localStorage.key(i));
+        if (isNaN(tmp) || tmp < 0 || tmp+""!=localStorage.key(i)) continue;
+        count = parseInt(localStorage.getItem(localStorage.key(i)));
+        if (count === 1) {
+          if (!determined) {
+            determined = true;
+            id = tmp;
+          } else {
+            count=2;
+          }
+        } else if (count<=0) count = 1;
+        localStorage.setItem(localStorage.key(i), count-1);
+      }
+      if (!determined) {
+        if (order===RANDOM) {
+          id = Math.floor(Math.random() * num);
+        } else if (order===INORDER) {
+          tmp = localStorage.getItem("nextid");
+          if (tmp==null) {
+            localStorage.setItem("nextid", 1);
+            id = 0;
+          } else {
+            id = parseInt(tmp) % num;
+            localStorage.setItem("nextid", id+1);
+          }
+        } else if (order==REVERSE) {
+          tmp = localStorage.getItem("nextid");
+          if (tmp==null) {
+            localStorage.setItem("nextid", num-2);
+            id = num-1;
+          } else {
+            id = (parseInt(tmp) + num) % num;
+            localStorage.setItem("nextid", (id-1+num)%num);
+          }
+        }
+      }
+      voc.innerText = words[id];
+      ans = Math.floor(Math.random() * 5);
+      console.log("ans is " + ans + " :" + meanings[id]);
+      opts[ans].innerText = meanings[id];
+      var other = 0;
+      var others = [];
+      var pass;
+      for (i=0;i<5;i++) {
+        opts[i].className = "";
+        if (i===ans) continue;
+        pass = true;
+        tmp = 0;
+        while (true) {
+          if (tmp>1000) {
+            console.log("infinite loop");
+            break;
+          }
+          pass = true;
+          other = Math.floor(Math.random() * num);
+          console.log("randomly generate wrong opt: " + other)
+          for (j in others) {
+            if (others[j]===other) {
+              pass = false;
+              console.log("duplicate wrong opt");
+              break;
+            }
+          }
+          if (pass && other!==id) {
+            others.push(other);
+            break;
+          }
+          tmp+=1;
+        }
+        opts[i].innerText = meanings[other];
+        console.log("set " + i + " to " + meanings[other]);
+      }
+    }
+    function check() {
+      var count;
+      if (submitBtn.value == "ok") {
+        submitBtn.value = "submit";
+        for (i = 0; i < radios.length; i++) radios[i].checked = false;
+        next();
+        return;
+      }
+      for (i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+          if (radios[i].value!=="v"+(ans+1)) {
+            wrong();
+          } else {
+            radios[i].checked = false;
+            if (localStorage.getItem(id) !== null && localStorage.getItem(id+"exp") !== null) {
+              count = parseInt(localStorage.getItem(id+"exp"));
+              localStorage.setItem(id+"exp", count+1);
+              localStorage.setItem(id, 1<<(count+1));
+              console.log(id + " is set to " + (1<<(count+1)));
+            }
+            next();
+            break;
+          }
+        }
+      }
+    }
+    function wrong(){
+      opts[ans].className = "red";
+      submitBtn.value = "ok";
+      localStorage.setItem(id, 1);
+      localStorage.setItem(id+"exp", 0);
+      console.log(id + " is set to " + 1);
+    }
+    next();
+    submitBtn.onclick = check;
+    document.getElementById("dontknow").onclick = wrong;
+    window.onkeyup = function(e) {
+      e.preventDefault();
+      var kc = e.keyCode ? e.keyCode : e.which;
+      if (kc == 32 || kc==13) check();
+    }
+  }
+  </script>
+  <style type="text/css">
+  * {font-size: 25px; margin: 10px;}
+  #word {font-size: 40px;}
+  input[type="button"] {font-size: 25px; width: 400px; height:50px;}
+  form {width: 900px; margin: 100px auto 0;}
+  .red {color: red; font-weight: bold;}
+  input:focus {outline: none;}
+  </style>
+</head>
+<body>
+  <form>
+    <span id="word">voc</span>
+    <br>
+    <input type="radio" name="opt" id="option1" value="v1">
+    <label id="lopt1" for="option1">v1</label>
+    <br>
+
+    <input type="radio" name="opt" id="option2" value="v2">
+    <label id="lopt2" for="option2">v2</label>
+    <br>
+
+    <input type="radio" name="opt" id="option3" value="v3">
+    <label id="lopt3" for="option3">v3</label>
+    <br>
+
+    <input type="radio" name="opt" id="option4" value="v4">
+    <label id="lopt4" for="option4">v4</label>
+    <br>
+
+    <input type="radio" name="opt" id="option5" value="v5">
+    <label id="lopt5" for="option5">v5</label>
+    <br>
+    <input type="button" value="submit" id="submit"><br>
+    <input type="button" value="I don't know" id="dontknow">
+  </form>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-51054878-1', 'zjhzyyk.github.io');
+    ga('send', 'pageview');
+
+  </script>
+</body>
+</html>
