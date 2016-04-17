@@ -15,11 +15,28 @@
       }
     }
   }
+
+  // Just want a working program so not using the best approach.
+  // localStorage is a key value pair map.
+  // Generally, A word doesn't have any map entry in localStorage.
+  // But once user forgets a word, two map entries are stored into localStorage for the forgotten word:
+  // Call the number that indicates when the word should be tested, COUNT:
+  // word id -> COUNT
+  // word id -> exponent of COUNT
+  // If COUNT is 1, the word should be tested immediately.
+  // next() decrements COUNT for all words in localStorage
+  // and selects next word according to specified order.
+  // If there are multiple words with COUNT 1, the first word iterated will be chosen as next word.
+  // If there are no words with COUNT 1, next() will select word according to value of key 'nextId'.
+  // check() updates localStorage entries of tested words if wrong input is given.
   window.onload = function(){
     var RANDOM = 0;
     var INORDER = 1;
     var REVERSE = -1;
+
+    // Specify order here.
     var order = INORDER;
+    
     var num = words.length;
     var voc = document.getElementById("word");
     var opts = [];
@@ -36,6 +53,7 @@
     }
     function next() {
       var count;
+      // whether a forgotten word is chosen as next word.
       var determined = false;
       for (i=0; i<localStorage.length; i++) {
         tmp = parseInt(localStorage.key(i));
@@ -93,7 +111,7 @@
           }
           pass = true;
           other = Math.floor(Math.random() * num);
-          console.log("randomly generate wrong opt: " + other)
+          // console.log("randomly generate wrong opt: " + other)
           for (j in others) {
             if (others[j]===other) {
               pass = false;
@@ -108,7 +126,7 @@
           tmp+=1;
         }
         opts[i].innerText = meanings[other];
-        console.log("set " + i + " to " + meanings[other]);
+        // console.log("set " + i + " to " + meanings[other]);
       }
     }
     function check() {
@@ -128,8 +146,8 @@
             if (localStorage.getItem(id) !== null && localStorage.getItem(id+"exp") !== null) {
               count = parseInt(localStorage.getItem(id+"exp"));
               localStorage.setItem(id+"exp", count+1);
-              localStorage.setItem(id, 1<<(count+1));
-              console.log(id + " is set to " + (1<<(count+1)));
+              localStorage.setItem(id, (1<<(count+1))+1);
+              console.log(id + " is set to " + ((1<<(count+1))+1));
             }
             next();
             break;
@@ -140,9 +158,11 @@
     function wrong(){
       opts[ans].className = "red";
       submitBtn.value = "ok";
-      localStorage.setItem(id, 1);
+      // id = (1<<exp)+1
+      // id = (1<<0)+1 = 2
+      localStorage.setItem(id, 2);
       localStorage.setItem(id+"exp", 0);
-      console.log(id + " is set to " + 1);
+      console.log(id + " is set to " + 2);
     }
     next();
     submitBtn.onclick = check;
