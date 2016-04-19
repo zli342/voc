@@ -22,7 +22,7 @@
   // But once user forgets a word, two map entries are stored into localStorage for the forgotten word:
   // Call the number that indicates when the word should be tested, COUNT:
   // word id -> COUNT
-  // word id -> exponent of COUNT
+  // word id + exp -> exponent of COUNT
   // If COUNT is 1, the word should be tested immediately.
   // next() decrements COUNT for all words in localStorage
   // and selects next word according to specified order.
@@ -36,6 +36,9 @@
 
     // Specify order here.
     var order = INORDER;
+
+    // forgotten words will appear again in 10, 20, 40, 80.
+    var base = 10;
     
     var num = words.length;
     var voc = document.getElementById("word");
@@ -146,8 +149,8 @@
             if (localStorage.getItem(id) !== null && localStorage.getItem(id+"exp") !== null) {
               count = parseInt(localStorage.getItem(id+"exp"));
               localStorage.setItem(id+"exp", count+1);
-              localStorage.setItem(id, (1<<(count+1))+1);
-              console.log(id + " is set to " + ((1<<(count+1))+1));
+              localStorage.setItem(id, (1<<(count+1))*base+1);
+              console.log(id + " is set to " + ((1<<(count+1))*base+1));
             }
             next();
             break;
@@ -160,9 +163,9 @@
       submitBtn.value = "ok";
       // id = (1<<exp)+1
       // id = (1<<0)+1 = 2
-      localStorage.setItem(id, 2);
+      localStorage.setItem(id, 1+base);
       localStorage.setItem(id+"exp", 0);
-      console.log(id + " is set to " + 2);
+      console.log(id + " is set to " + (1+base));
     }
     next();
     submitBtn.onclick = check;
