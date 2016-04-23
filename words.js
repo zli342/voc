@@ -2094,6 +2094,7 @@ var words=[
 "rickety",
 "rider",
 "ridicule",
+"rife",
 "rift",
 "rile",
 "ripen",
