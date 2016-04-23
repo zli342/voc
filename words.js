@@ -2103,7 +2103,6 @@ var words=[
 "rive",
 "riveting",
 "rivulet",
-"rickety",
 "robust",
 "roil",
 "roisterer",
